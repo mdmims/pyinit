@@ -1,16 +1,16 @@
 package main
 
 import (
-	//"errors"
 	"flag"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
-	config "pyinit/config"
+	"pyinit/config"
 )
 
 const (
@@ -24,10 +24,12 @@ Usage: pyinit [OPTIONS] [ARGS]...
 CLI to generate gitignore files and other useful python files.
 Options:
     -h  Display help message and exit.
+	-a  Create all available files with default settings
 	-v  Display version.
 	-l  Display the valid gitignore.io API options.
-	-f  Create .flake8 file
-	-l  Create License file
+	-f  Create .flake8 file with default settings
+	-l  Create License file (MIT)
+	-p  Create pyproject.toml file with black formatter default settings for Python 3.8
 Arguments:
 	TARGETS: Space separated list of gitignore.io language options.	[optional]
 Examples:
@@ -43,14 +45,18 @@ var (
 	listFlag    bool
 	flake8Flag  bool
 	licenseFlag bool
+	tomlFlag    bool
+	allFlag     bool
 )
 
 func main() {
 	flag.BoolVar(&helpFlag, "help", false, "Help information")
 	flag.BoolVar(&versionFlag, "version", false, "Version number")
 	flag.BoolVar(&listFlag, "list", false, "Gitignore API language options list")
+	flag.BoolVar(&allFlag, "a", false, "-a")
 	flag.BoolVar(&flake8Flag, "f", false, "-f")
 	flag.BoolVar(&licenseFlag, "l", false, "-l")
+	flag.BoolVar(&tomlFlag, "p", false, "-p")
 
 	flag.Usage = func() {
 		fmt.Println(helpMessage)
@@ -81,17 +87,17 @@ func run() {
 		os.Exit(1)
 
 	default:
+		if allFlag {
+			fmt.Println("all selected")
+		}
 		if licenseFlag {
-			err := createDataFile(config.LicenseData, "License")
-			if err != nil {
-				return
-			}
+			create("License")
 		}
 		if flake8Flag {
-			err := createDataFile(config.FlakeData, ".flake8")
-			if err != nil {
-				return
-			}
+			create(".flake8")
+		}
+		if tomlFlag {
+			create("pyproject.toml")
 		}
 		ignoreList := os.Args[1:]
 		makeIgnoreFile(ignoreList, ignoreURL)
@@ -232,27 +238,39 @@ func makeIgnoreFile(targets []string, url string) {
 }
 
 // createDataFile creates specified file in current directory
-func createDataFile(data string, filename string) error {
+func createDataFile(data string, filename string) {
 	cwd, err := os.Getwd()
 	if err != nil {
-		return err
+		fmt.Printf("Error: %s\n", err)
+		os.Exit(1)
 	}
 
 	ignoreFilePath := filepath.Join(cwd, filename)
 
 	file, err := os.OpenFile(ignoreFilePath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
-		return err
+		fmt.Printf("Error: %s\n", err)
+		os.Exit(1)
 	}
 	defer file.Close()
 
 	_, err = file.Write([]byte(data))
 	if err != nil {
-		return err
+		fmt.Printf("Error: %s\n", err)
+		os.Exit(1)
 	}
 	if err := file.Sync(); err != nil {
-		return err
+		fmt.Printf("Error: %s\n", err)
+		os.Exit(1)
 	}
+}
 
-	return nil
+// create reads available file mapping and creates designated file
+func create(name string) {
+	data, ok := config.OptionsMap[name]
+	if ok {
+		createDataFile(data, name)
+	} else {
+		fmt.Println("Unable to create " + strconv.Quote(name) + "file.")
+	}
 }
