@@ -7,8 +7,9 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"pyinit/config"
 	"strings"
+
+	"pyinit/config"
 )
 
 const (
@@ -83,7 +84,7 @@ func run() {
 		os.Exit(0)
 
 	case listFlag:
-		fmt.Println(listMessage)
+		printApiList(ignoreURL)
 		os.Exit(0)
 
 	default:
@@ -103,8 +104,8 @@ func run() {
 	}
 }
 
-// GetIgnore calls the gitignore API and returns response
-func GetIgnore(targets []string, url string) ([]byte, error) {
+// getIgnore calls the gitignore API and returns response
+func getIgnore(targets []string, url string) ([]byte, error) {
 	targetOptions := buildIgnoreOptions(targets)
 	targetURL := strings.Join([]string{url, targetOptions}, "/")
 
@@ -158,8 +159,8 @@ func removeDuplicateStrings(strSlice []string) []string {
 	return list
 }
 
-// GetList returns the gitignore API response for 'list'
-func GetList(url string) ([]byte, error) {
+// getList returns the gitignore API response for 'list'
+func getList(url string) ([]byte, error) {
 	targetURL := strings.Join([]string{url, "list"}, "/")
 
 	response, err := http.Get(targetURL)
@@ -174,6 +175,16 @@ func GetList(url string) ([]byte, error) {
 	}
 
 	return data, nil
+}
+
+// printApiList retrieves list of available language options from gitignore api and prints to stdout
+func printApiList(url string) {
+	data, err := getList(url)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		os.Exit(1)
+	}
+	fmt.Println(string(data))
 }
 
 // WriteToIgnoreFile creates .gitignore config using supplied config
@@ -214,7 +225,7 @@ func customIgnoreOptions(data []byte) []byte {
 
 // makeIgnoreFile retrieves gitignore content from api, adds custom entries and creates the actual file
 func makeIgnoreFile(targets []string, url string) {
-	data, err := GetIgnore(targets, url)
+	data, err := getIgnore(targets, url)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err)
 		os.Exit(1)
