@@ -234,7 +234,6 @@ func makeIgnoreFile(targets []string, url string) {
 	err = WriteToIgnoreFile(data, ".gitignore")
 	if err != nil {
 		fmt.Printf("Error: %s.\n", err)
-		os.Exit(1)
 	}
 }
 
@@ -243,7 +242,6 @@ func createDataFile(data string, filename string) {
 	cwd, err := os.Getwd()
 	if err != nil {
 		fmt.Printf("Error: %s\n", err)
-		os.Exit(1)
 	}
 
 	ignoreFilePath := filepath.Join(cwd, filename)
@@ -251,18 +249,15 @@ func createDataFile(data string, filename string) {
 	file, err := os.OpenFile(ignoreFilePath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err)
-		os.Exit(1)
 	}
 	defer file.Close()
 
 	_, err = file.Write([]byte(data))
 	if err != nil {
 		fmt.Printf("Error: %s\n", err)
-		os.Exit(1)
 	}
 	if err := file.Sync(); err != nil {
 		fmt.Printf("Error: %s\n", err)
-		os.Exit(1)
 	}
 }
 

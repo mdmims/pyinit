@@ -25,7 +25,7 @@ func GetEmbeds(filename string) string {
 		d, _ := files.ReadFile("files/" + name)
 		data = string(d)
 	} else {
-		fmt.Println("Unable to create file " + strconv.Quote(filename) + ".")
+		fmt.Println("Unable to load embedded file " + strconv.Quote(filename) + ".")
 	}
 	return data
 }
