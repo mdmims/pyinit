@@ -21,30 +21,31 @@ const (
 Usage: pyinit [OPTIONS] [ARGS]...
 CLI to generate gitignore files and other useful python files.
 Options:
-    -h  Display help message and exit.
-	-a  Create all available files with default settings
-	-v  Display version.
-	-l  Display the valid gitignore.io API options.
-	-f  Create .flake8 file with default settings
-	-l  Create License file (MIT)
-	-p  Create pyproject.toml file with black formatter default settings for Python 3.8
+	--help     Display help message and exit.
+	--version  Display version.
+	--list     Display the valid gitignore.io API options.
+
+	-g	   Create .gitignore file with default language options (macos, windows, python)
+	-f	   Create .flake8 file with default settings
+	-l	   Create License file (MIT)
+	-p	   Create pyproject.toml file with black formatter default settings for Python 3.8
 Arguments:
 	TARGETS: Space separated list of gitignore.io language options.	[optional]
 Examples:
-$ pyinit -h
-$ pyinit -f -l go python java
-$ pyinit -a
+$ pyinit --help
+$ pyinit -f -g -l -p go python java
 `
 )
 
 var (
-	helpFlag    bool
-	versionFlag bool
-	listFlag    bool
-	flake8Flag  bool
-	licenseFlag bool
-	tomlFlag    bool
-	allFlag     bool
+	helpFlag      bool
+	versionFlag   bool
+	listFlag      bool
+	gitignoreFlag bool
+	flake8Flag    bool
+	licenseFlag   bool
+	tomlFlag      bool
+	allFlag       bool
 )
 
 func main() {
@@ -53,6 +54,7 @@ func main() {
 	flag.BoolVar(&listFlag, "list", false, "Gitignore API language options list")
 	flag.BoolVar(&allFlag, "a", false, "-a")
 	flag.BoolVar(&flake8Flag, "f", false, "-f")
+	flag.BoolVar(&gitignoreFlag, "g", false, "-g")
 	flag.BoolVar(&licenseFlag, "l", false, "-l")
 	flag.BoolVar(&tomlFlag, "p", false, "-p")
 
@@ -67,6 +69,11 @@ func main() {
 }
 
 func run() {
+	if flag.NArg() == 0 && flag.NFlag() == 0 && !(helpFlag || listFlag || versionFlag) {
+		fmt.Fprintln(os.Stdout, helpMessage)
+		os.Exit(1)
+	}
+
 	switch {
 	case helpFlag:
 		fmt.Fprintln(os.Stdout, helpMessage)
@@ -77,17 +84,10 @@ func run() {
 		os.Exit(0)
 
 	case listFlag:
-		printList(os.Stdout, ignoreURL)
+		printList(os.Stdout, listMessage)
 		os.Exit(0)
 
-	case os.Args[1] == "list":
-		fmt.Println(listMessage)
-		os.Exit(1)
-
 	default:
-		if allFlag {
-			fmt.Println("all selected")
-		}
 		if licenseFlag {
 			create("License")
 		}
@@ -97,8 +97,11 @@ func run() {
 		if tomlFlag {
 			create("pyproject.toml")
 		}
-		ignoreList := os.Args[1:]
-		makeIgnoreFile(ignoreList, ignoreURL)
+		if gitignoreFlag {
+			ignoreList := os.Args[1:]
+			makeIgnoreFile(ignoreList, ignoreURL)
+		}
+		fmt.Fprintln(os.Stdout, helpMessage)
 		os.Exit(0)
 	}
 }
