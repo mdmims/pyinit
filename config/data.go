@@ -18,6 +18,7 @@ var FileMap = map[string]string{
 	".dockerignore":  "dockerignore",
 }
 
+// GetEmbeds reads embedded files in binary and returns their content as string
 func GetEmbeds(filename string) string {
 	var data string
 	name, ok := FileMap[filename]

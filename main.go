@@ -33,8 +33,7 @@ Arguments:
 	TARGETS: Space separated list of gitignore.io language options.	[optional]
 Examples:
 $ pyinit --help
-$ pyinit -f -g -l -p go python java
-`
+$ pyinit -f -g -l -p go python java`
 )
 
 var (
@@ -70,21 +69,21 @@ func main() {
 
 func run() {
 	if flag.NArg() == 0 && flag.NFlag() == 0 && !(helpFlag || listFlag || versionFlag) {
-		fmt.Fprintln(os.Stdout, helpMessage)
+		fmt.Println(helpMessage)
 		os.Exit(1)
 	}
 
 	switch {
 	case helpFlag:
-		fmt.Fprintln(os.Stdout, helpMessage)
+		fmt.Println(helpMessage)
 		os.Exit(0)
 
 	case versionFlag:
-		fmt.Fprintln(os.Stdout, versionMessage)
+		fmt.Println(versionMessage)
 		os.Exit(0)
 
 	case listFlag:
-		printList(os.Stdout, listMessage)
+		fmt.Println(listMessage)
 		os.Exit(0)
 
 	default:
@@ -101,8 +100,6 @@ func run() {
 			ignoreList := os.Args[1:]
 			makeIgnoreFile(ignoreList, ignoreURL)
 		}
-		fmt.Fprintln(os.Stdout, helpMessage)
-		os.Exit(0)
 	}
 }
 
@@ -126,6 +123,7 @@ func GetIgnore(targets []string, url string) ([]byte, error) {
 
 }
 
+// buildIgnoreOptions builds a comma separated string of desired language options for gitignore api
 func buildIgnoreOptions(targetOptions []string) string {
 	// create map with default options
 	s := make(map[string]bool)
@@ -147,6 +145,7 @@ func buildIgnoreOptions(targetOptions []string) string {
 	return options
 }
 
+// removeDuplicateStrings removes duplicate string values from string slices
 func removeDuplicateStrings(strSlice []string) []string {
 	allKeys := make(map[string]bool)
 	var list []string
@@ -203,15 +202,6 @@ func WriteToIgnoreFile(data []byte, filename string) error {
 	return nil
 }
 
-func printList(where io.Writer, url string) {
-	data, err := GetList(url)
-	if err != nil {
-		fmt.Printf("Error: %s\n", err)
-		os.Exit(1)
-	}
-	fmt.Fprintln(where, string(data))
-}
-
 // customIgnoreOptions adds custom ignore options to .gitignore file
 func customIgnoreOptions(data []byte) []byte {
 	customOptions := []string{".idea", ".vscode"}
@@ -222,6 +212,7 @@ func customIgnoreOptions(data []byte) []byte {
 	return data
 }
 
+// makeIgnoreFile retrieves gitignore content from api, adds custom entries and creates the actual file
 func makeIgnoreFile(targets []string, url string) {
 	data, err := GetIgnore(targets, url)
 	if err != nil {
