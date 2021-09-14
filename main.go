@@ -8,28 +8,32 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
+
+	config "pyinit/config"
 )
 
 const (
 	// ignoreURL is the base url for the gitignore API
 	ignoreURL      string = "https://www.toptal.com/developers/gitignore/api"
-	versionMessage string = "goignore version: 0.2.4"
-	listMessage    string = "To get a list of valid targets, run goignore --list"
+	versionMessage string = "version: 0.0.1"
+	listMessage    string = "To get a list of valid targets, run pyinit --list"
 
 	helpMessage string = `
-Usage: goignore [OPTIONS] [ARGS]...
-Handy CLI to generate great gitignore files.
+Usage: pyinit [OPTIONS] [ARGS]...
+CLI to generate gitignore files and other useful python files.
 Options:
-	--version: Display goignore's version.
-	--help: Show this help message and exit.
-	--list: Show the valid gitignore.io targets.
+    -h  Display help message and exit.
+	-v  Display version.
+	-l  Display the valid gitignore.io API options.
+	-f  Create .flake8 file
+	-l  Create License file
 Arguments:
-	TARGETS: Space separated list of gitignore.io targets.	[required]
+	TARGETS: Space separated list of gitignore.io language options.	[optional]
 Examples:
-$ goignore macos vscode go
-$ goignore --list
+$ pyinit -h
+$ pyinit -f -l go python java
+$ pyinit -a
 `
 )
 
@@ -37,12 +41,16 @@ var (
 	helpFlag    bool
 	versionFlag bool
 	listFlag    bool
+	flake8Flag  bool
+	licenseFlag bool
 )
 
 func main() {
-	flag.BoolVar(&helpFlag, "help", false, "--help")
-	flag.BoolVar(&versionFlag, "version", false, "--version")
-	flag.BoolVar(&listFlag, "list", false, "--list")
+	flag.BoolVar(&helpFlag, "help", false, "Help information")
+	flag.BoolVar(&versionFlag, "version", false, "Version number")
+	flag.BoolVar(&listFlag, "list", false, "Gitignore API language options list")
+	flag.BoolVar(&flake8Flag, "f", false, "-f")
+	flag.BoolVar(&licenseFlag, "l", false, "-l")
 
 	flag.Usage = func() {
 		fmt.Println(helpMessage)
@@ -52,15 +60,9 @@ func main() {
 	flag.Parse()
 
 	run()
-
 }
 
 func run() {
-	if flag.NArg() < 2 && !(helpFlag || listFlag || versionFlag) {
-		fmt.Fprintln(os.Stdout, helpMessage)
-		os.Exit(1)
-	}
-
 	switch {
 	case helpFlag:
 		fmt.Fprintln(os.Stdout, helpMessage)
@@ -79,6 +81,18 @@ func run() {
 		os.Exit(1)
 
 	default:
+		if licenseFlag {
+			err := createDataFile(config.LicenseData, "License")
+			if err != nil {
+				return
+			}
+		}
+		if flake8Flag {
+			err := createDataFile(config.FlakeData, ".flake8")
+			if err != nil {
+				return
+			}
+		}
 		ignoreList := os.Args[1:]
 		makeIgnoreFile(ignoreList, ignoreURL)
 		os.Exit(0)
@@ -110,6 +124,7 @@ func buildIgnoreOptions(targetOptions []string) string {
 	s := make(map[string]bool)
 	s["macos"] = true
 	s["windows"] = true
+	s["python"] = true
 
 	// add default options to input
 	for k := range s {
@@ -155,7 +170,7 @@ func GetList(url string) ([]byte, error) {
 	return data, nil
 }
 
-// WriteToIgnoreFile creates .gitignore data using supplied data
+// WriteToIgnoreFile creates .gitignore config using supplied config
 func WriteToIgnoreFile(data []byte, filename string) error {
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -201,13 +216,6 @@ func customIgnoreOptions(data []byte) []byte {
 }
 
 func makeIgnoreFile(targets []string, url string) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		fmt.Printf("Error: %s.\n", err)
-		os.Exit(1)
-	}
-
-	fmt.Println("Creating .gitignore file in " + strconv.Quote(cwd) + " directory...")
 	data, err := GetIgnore(targets, url)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err)
@@ -220,7 +228,31 @@ func makeIgnoreFile(targets []string, url string) {
 	if err != nil {
 		fmt.Printf("Error: %s.\n", err)
 		os.Exit(1)
-	} else {
-		fmt.Println("Done!")
 	}
+}
+
+// createDataFile creates specified file in current directory
+func createDataFile(data string, filename string) error {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	ignoreFilePath := filepath.Join(cwd, filename)
+
+	file, err := os.OpenFile(ignoreFilePath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = file.Write([]byte(data))
+	if err != nil {
+		return err
+	}
+	if err := file.Sync(); err != nil {
+		return err
+	}
+
+	return nil
 }
