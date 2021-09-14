@@ -1,0 +1,7 @@
+[tool.black]
+line-length = 160
+target-version = ['py38']
+include = '\.pyi?$'
+extend-exclude = '''
+^/venv
+'''

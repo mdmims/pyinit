@@ -7,10 +7,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
-	"strings"
-
 	"pyinit/config"
+	"strings"
 )
 
 const (
@@ -267,10 +265,6 @@ func createDataFile(data string, filename string) {
 
 // create reads available file mapping and creates designated file
 func create(name string) {
-	data, ok := config.OptionsMap[name]
-	if ok {
-		createDataFile(data, name)
-	} else {
-		fmt.Println("Unable to create " + strconv.Quote(name) + "file.")
-	}
+	data := config.GetEmbeds(name)
+	createDataFile(data, name)
 }
