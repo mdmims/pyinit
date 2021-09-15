@@ -22,7 +22,7 @@ https://golang.org/doc/install
 ```
 Clone repository 
 ```
-git clone git@gitlab.verizon.com:mimsmi1/pyinit.git
+git clone git@gitlab.verizon.com:data_science_cary_nc/pyinit.git
 ```
 Compile binary within project
 ```
