@@ -27,8 +27,8 @@ Options:
 	--version  Display version.
 	--list     Display the valid gitignore.io API options.
 
-	-a     Create all available files
-	-d     Create Dockerfile with basic Python (3.8) template
+	-a	   Create all available files
+	-d	   Create Dockerfile with basic Python (3.8) template
 	-g	   Create .gitignore file with default language options (macos, windows, python)
 	-f	   Create .flake8 file with default settings
 	-l	   Create License file (MIT)
