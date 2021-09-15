@@ -12,6 +12,8 @@ through the [gitignore api](https://docs.gitignore.io/use/api).
   - Generates MIT License file
 - Dockerfile
   - `python:3.8-slim-buster` basic template
+- .dockerignore
+  - includes various defaults
 
 ## Installation
 Install Go 
