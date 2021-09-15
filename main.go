@@ -17,7 +17,6 @@ const (
 	// ignoreURL is the base url for the gitignore API
 	ignoreURL      string = "https://www.toptal.com/developers/gitignore/api"
 	versionMessage string = "version: 0.0.1"
-	listMessage    string = "To get a list of valid targets, run pyinit --list"
 
 	helpMessage string = `
 Usage: pyinit [OPTIONS] [ARGS]...
