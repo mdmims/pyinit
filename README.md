@@ -10,6 +10,8 @@ through the [gitignore api](https://docs.gitignore.io/use/api).
   - includes `black` formatter settings for max line length (160) and Python Version 3.8
 - License
   - Generates MIT License file
+- Dockerfile
+  - `python:3.8-slim-buster` basic template
 
 ## Installation
 Install Go 
