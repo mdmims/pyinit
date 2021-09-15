@@ -16,17 +16,21 @@ var FileMap = map[string]string{
 	"License":        "License",
 	"pyproject.toml": "pyproject.toml",
 	".dockerignore":  "dockerignore",
+	"Dockerfile":     "Dockerfile",
 }
 
 // GetEmbeds reads embedded files in binary and returns their content as string
-func GetEmbeds(filename string) string {
+func GetEmbeds(filename string) (string, error) {
 	var data string
 	name, ok := FileMap[filename]
 	if ok {
-		d, _ := files.ReadFile("files/" + name)
+		d, err := files.ReadFile("files/" + name)
+		if err != nil {
+			return string(d), err
+		}
 		data = string(d)
 	} else {
 		fmt.Println("Unable to load embedded file " + strconv.Quote(filename) + ".")
 	}
-	return data
+	return data, nil
 }

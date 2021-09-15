@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"pyinit/config"
@@ -26,6 +27,8 @@ Options:
 	--version  Display version.
 	--list     Display the valid gitignore.io API options.
 
+	-a     Create all available files
+	-d     Create Dockerfile with basic Python (3.8) template
 	-g	   Create .gitignore file with default language options (macos, windows, python)
 	-f	   Create .flake8 file with default settings
 	-l	   Create License file (MIT)
@@ -34,29 +37,32 @@ Arguments:
 	TARGETS: Space separated list of gitignore.io language options.	[optional]
 Examples:
 $ pyinit --help
-$ pyinit -f -g -l -p go python java`
+$ pyinit -f -g -l -p -d go python java
+$ pyinit -a macos python`
 )
 
 var (
-	helpFlag      bool
-	versionFlag   bool
-	listFlag      bool
-	gitignoreFlag bool
-	flake8Flag    bool
-	licenseFlag   bool
-	tomlFlag      bool
-	allFlag       bool
+	helpFlag       bool
+	versionFlag    bool
+	listFlag       bool
+	gitignoreFlag  bool
+	flake8Flag     bool
+	licenseFlag    bool
+	tomlFlag       bool
+	dockerfileFlag bool
+	allFlag        bool
 )
 
 func main() {
 	flag.BoolVar(&helpFlag, "help", false, "Help information")
 	flag.BoolVar(&versionFlag, "version", false, "Version number")
 	flag.BoolVar(&listFlag, "list", false, "Gitignore API language options list")
-	flag.BoolVar(&allFlag, "a", false, "-a")
-	flag.BoolVar(&flake8Flag, "f", false, "-f")
-	flag.BoolVar(&gitignoreFlag, "g", false, "-g")
-	flag.BoolVar(&licenseFlag, "l", false, "-l")
-	flag.BoolVar(&tomlFlag, "p", false, "-p")
+	flag.BoolVar(&allFlag, "a", false, "Create all files")
+	flag.BoolVar(&dockerfileFlag, "d", false, "Create Dockerfile")
+	flag.BoolVar(&flake8Flag, "f", false, "Create .flake8")
+	flag.BoolVar(&gitignoreFlag, "g", false, "Create .gitignore")
+	flag.BoolVar(&licenseFlag, "l", false, "Create License")
+	flag.BoolVar(&tomlFlag, "p", false, "Create pyproject.toml")
 
 	flag.Usage = func() {
 		fmt.Println(helpMessage)
@@ -88,6 +94,12 @@ func run() {
 		os.Exit(0)
 
 	default:
+		if allFlag {
+			createAllFiles()
+			ignoreList := flag.Args()
+			makeIgnoreFile(ignoreList)
+			os.Exit(0)
+		}
 		if licenseFlag {
 			create("License")
 		}
@@ -97,9 +109,12 @@ func run() {
 		if tomlFlag {
 			create("pyproject.toml")
 		}
+		if dockerfileFlag {
+			create("Dockerfile")
+		}
 		if gitignoreFlag {
-			ignoreList := os.Args[1:]
-			makeIgnoreFile(ignoreList, ignoreURL)
+			ignoreList := flag.Args()
+			makeIgnoreFile(ignoreList)
 		}
 	}
 }
@@ -224,8 +239,8 @@ func customIgnoreOptions(data []byte) []byte {
 }
 
 // makeIgnoreFile retrieves gitignore content from api, adds custom entries and creates the actual file
-func makeIgnoreFile(targets []string, url string) {
-	data, err := getIgnore(targets, url)
+func makeIgnoreFile(targets []string) {
+	data, err := getIgnore(targets, ignoreURL)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err)
 		os.Exit(1)
@@ -265,6 +280,20 @@ func createDataFile(data string, filename string) {
 
 // create reads available file mapping and creates designated file
 func create(name string) {
-	data := config.GetEmbeds(name)
+	data, err := config.GetEmbeds(name)
+	if err != nil {
+		fmt.Println("Unable to load embedded file " + strconv.Quote(name) + ".")
+	}
 	createDataFile(data, name)
+}
+
+// createAllFiles creates all available files in current directory regardless of cli flags
+func createAllFiles() {
+	for file, _ := range config.FileMap {
+		data, err := config.GetEmbeds(file)
+		if err != nil {
+			fmt.Println("Unable to load embedded file " + strconv.Quote(file) + ".")
+		}
+		createDataFile(data, file)
+	}
 }
