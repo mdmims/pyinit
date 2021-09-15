@@ -11,7 +11,6 @@ import (
 var GetList = getList
 
 func TestGetList(t *testing.T) {
-
 	// generate mock response data
 	listData := []byte("macos,vscode,python,go,bash")
 
@@ -30,7 +29,6 @@ func TestGetList(t *testing.T) {
 
 	t.Run(
 		"test fetches correct data", func(t *testing.T) {
-
 			got, err := GetList(testURL)
 			if err != nil {
 				t.Fatalf("Error: %s\n", err)
