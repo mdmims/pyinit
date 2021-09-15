@@ -1,14 +1,6 @@
 
-# Created by https://www.toptal.com/developers/gitignore/api/-g,-f,-l,-p,macos,windows,python
-# Edit at https://www.toptal.com/developers/gitignore?templates=-g,-f,-l,-p,macos,windows,python
-
-#!! ERROR: -f is undefined. Use list command to see defined gitignore types !!#
-
-#!! ERROR: -g is undefined. Use list command to see defined gitignore types !!#
-
-#!! ERROR: -l is undefined. Use list command to see defined gitignore types !!#
-
-#!! ERROR: -p is undefined. Use list command to see defined gitignore types !!#
+# Created by https://www.toptal.com/developers/gitignore/api/macos,windows,python
+# Edit at https://www.toptal.com/developers/gitignore?templates=macos,windows,python
 
 ### macOS ###
 # General
@@ -204,7 +196,7 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# End of https://www.toptal.com/developers/gitignore/api/-g,-f,-l,-p,macos,windows,python
+# End of https://www.toptal.com/developers/gitignore/api/macos,windows,python
 
 .idea/
 
