@@ -28,6 +28,7 @@ Options:
 
 	-a	   Create all available files
 	-d	   Create Dockerfile with basic Python (3.8) template
+	-di	   Create .dockerignore file with default ignore settings
 	-g	   Create .gitignore file with default language options (macos, windows, python)
 	-f	   Create .flake8 file with default settings
 	-l	   Create License file (MIT)
@@ -49,6 +50,7 @@ var (
 	licenseFlag    bool
 	tomlFlag       bool
 	dockerfileFlag bool
+	dockignoreFlag bool
 	allFlag        bool
 )
 
@@ -58,6 +60,7 @@ func main() {
 	flag.BoolVar(&listFlag, "list", false, "Gitignore API language options list")
 	flag.BoolVar(&allFlag, "a", false, "Create all files")
 	flag.BoolVar(&dockerfileFlag, "d", false, "Create Dockerfile")
+	flag.BoolVar(&dockignoreFlag, "di", false, "Create .dockerignore")
 	flag.BoolVar(&flake8Flag, "f", false, "Create .flake8")
 	flag.BoolVar(&gitignoreFlag, "g", false, "Create .gitignore")
 	flag.BoolVar(&licenseFlag, "l", false, "Create License")
@@ -110,6 +113,9 @@ func run() {
 		}
 		if dockerfileFlag {
 			create("Dockerfile")
+		}
+		if dockignoreFlag {
+			create(".dockerignore")
 		}
 		if gitignoreFlag {
 			ignoreList := flag.Args()
